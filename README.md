@@ -28,7 +28,7 @@ This repository has the following directory structure:
 
 - The ```output``` folders contains my results and it is this folder that you should save your own results when replicating the code. 
 
-- The ```src``` folders contains the code written in ```.R``` scripts. 
+- The ```src``` folders contains the code written in ```.Rmd``` scripts. 
 
 
 ## Discussion of results 
