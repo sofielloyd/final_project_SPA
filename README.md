@@ -3,9 +3,16 @@ This repository contains all of the code and data related to the final project f
 
 
 ## Assignment description 
+Our hypothesis is that the ten most happy countries in the world has a similar climate.   
+In order to investigate this hypothesis we have created a leaflet map with the HPI (Happy Planet Index) score the legend value. We have further created a temperature map, with the annual mean temperature across the globe.   
+To compare the two maps, we have found the ten most happy countries and plotted them into the temperature in order to visualise they geographically is located.  
 
 
 ## Method
+First, we have used ```tidyverse``` and ```dyplyr``` to do some data wrangling in order to get some data that we could work with.   
+Second, we have used ```leaflet``` to plot an interactive map with the values from our HPI dataset, which where used to add a legend into our leaflet map. The other three parameters (GDP, Family and Health) were used to add some labels into our polygon data to give a pop-up infobox on each country.  
+Thrid, we used ```raster``` to get the world climate in order to create a simply map with the annual mean temperature across the globe.  
+
 
 ## Usage
 In order to reproduce this code, you'll need to uploade your own data into the ```input``` folder.   
