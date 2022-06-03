@@ -11,7 +11,7 @@ To compare the two maps, we have found the ten most happy countries and plotted 
 ## Method
 First, we have used ```tidyverse``` and ```dyplyr``` to do some data wrangling in order to get some data that we could work with.   
 Second, we have used ```leaflet``` to plot an interactive map with the values from our HPI dataset, which where used to add a legend into our leaflet map. The other three parameters (GDP, Family and Health) were used to add some labels into our polygon data to give a pop-up infobox on each country.  
-Thrid, we used ```raster``` to get the world climate in order to create a simply map with the annual mean temperature across the globe.  
+Third, we used ```raster``` to get the world climate in order to create a simply map with the annual mean temperature across the globe.  
 
 
 ## Usage
