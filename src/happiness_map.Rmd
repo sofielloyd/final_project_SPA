@@ -1,0 +1,658 @@
+---
+title: "Final project: Map of Happiness"
+author: "Laura Louise Rokkjær and Sofie K. Lloyd Thomsen"
+date: "01/05/2022 updated `r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(rmdformats)
+library(htmlwidgets)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=FALSE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+options(scipen=999)
+```
+
+# Get libraries and load data
+
+## Activate libraries
+```{r libraries, eval=FALSE, echo=TRUE}
+library(rgdal)
+library(raster)
+library(leaflet) 
+library(dplyr)
+library(readr) 
+library(tidyverse) 
+```
+
+
+## Load data from 2015-2019
+First, we need to load our five .csv files from the World Happiness Report. 
+The data can also be found on Kaggle following [this](https://www.kaggle.com/datasets/unsdsn/world-happiness) link. 
+
+```{r load data, eval=FALSE, echo=TRUE}
+# read the five data frames from 2015-2019
+data_2015 <- read_csv("../input/2015.csv")
+data_2016 <- read_csv("../input/2016.csv")
+data_2017 <- read_csv("../input/2017.csv")
+data_2018 <- read_csv("../input/2018.csv")
+data_2019 <- read_csv("../input/2019.csv")
+```
+
+
+We then want to add a year column to the five data frames, so we know what year the data comes from. 
+
+```{r add year column, eval=FALSE, echo=TRUE}
+# 2015
+data_2015 <- data_2015 %>% 
+  mutate(Year = "2015")
+
+# 2016
+data_2016 <- data_2016 %>% 
+  mutate(Year = "2016")
+
+# 2017
+data_2017 <- data_2017 %>% 
+  mutate(Year = "2017")
+
+# 2018
+data_2018 <- data_2018 %>% 
+  mutate(Year = "2018")
+
+# 2019
+data_2019 <- data_2019 %>% 
+  mutate(Year = "2019")
+```
+
+
+## Get values
+We then want to combine all the country names into one data frame.
+
+```{r country names, eval=FALSE, echo=TRUE}
+# get country names from 2015-2019
+Countries <- c(data_2015$Country, 
+               data_2016$Country, 
+               data_2017$Country, 
+               data_2018$`Country or region`, 
+               data_2019$`Country or region`)
+```
+
+
+...And we do the same with the year columns. 
+
+```{r years, eval=FALSE, echo=TRUE}
+# get years from 2015-2019
+Years <- c(data_2015$Year,
+           data_2016$Year,
+           data_2017$Year,
+           data_2018$Year,
+           data_2019$Year)
+```
+
+
+...And the same with HPI scores
+
+```{r Happiness, eval=FALSE, echo=TRUE}
+# get happiness scores from 2015-2019
+HPI_scores <-  c(data_2015$`Happiness Score`,
+             data_2016$`Happiness Score`,
+             data_2017$Happiness.Score,
+             data_2018$Score,
+             data_2019$Score)
+```
+
+
+...And for GDP per capita.
+
+```{r GDP per capita, eval=FALSE, echo=TRUE}
+# get GDP from 2015-2019
+GDP <- c(data_2015$`Economy (GDP per Capita)`, 
+         data_2016$`Economy (GDP per Capita)`, 
+         data_2017$`Economy..GDP.per.Capita.`, 
+         data_2018$`GDP per capita`,
+         data_2019$`GDP per capita`)
+```
+
+
+...And for family/social support.
+
+```{r family/social support, eval=FALSE, echo=TRUE}
+# get family values from 2015-2019
+Family <- c(data_2015$Family,
+            data_2016$Family,
+            data_2017$Family,
+            data_2018$`Social support`,
+            data_2019$`Social support`)
+```
+
+
+...And for health.
+
+```{r health scores, eval=FALSE, echo=TRUE}
+# get health values from 2015-2019
+Health <- c(data_2015$`Health (Life Expectancy)`,
+            data_2016$`Health (Life Expectancy)`,
+            data_2017$Health..Life.Expectancy.,
+            data_2018$`Healthy life expectancy`,
+            data_2019$`Healthy life expectancy`)
+```
+
+
+# Create new data frames
+In order to get the data we need, we create four new data frames. All four data frames has the columns 'Countries', '2015', '2016', '2017', '2018', '2019' and 'mean_scores'. The values in the year columns and mean_scores varies from data frame to data frame, and reflect happiness (HPI), economy (GDP per capita), Social support (family) and health (life expectancy).
+
+
+## HPI data frame
+Now we create a data frame with the columns 'HPI_scores', 'Countries' and the five 'Years'. 
+
+```{r HPI, eval=FALSE, echo=TRUE}
+# bind columns 
+HPI_df <- cbind(Countries, HPI_scores, Years)
+
+
+# convert to data frame
+HPI_df <- as.data.frame(HPI_df)
+
+# convert 'Scores' to numeric
+HPI_df$HPI_scores <- as.numeric(HPI_df$HPI_scores)
+
+# pivot data frame from long to wide
+HPI_wide <- HPI_df %>%
+  # column names = years
+  pivot_wider(names_from = Years,
+              # rows = HPI scores
+              values_from = HPI_scores,
+              # if there is no HPI_scores write 'NA'
+              values_fill = NA)
+
+# get mean HPI score for all years
+HPI_wide$mean_score = rowMeans(HPI_wide[,c(2:6)], na.rm = TRUE)
+
+# round decimals to 2 digits
+HPI_wide <- HPI_wide %>%  
+  mutate_if(is.numeric,
+            round,
+            digits = 2)
+
+print(HPI_wide)
+```
+
+
+## GDP data frame
+Now we create a data frame with the columns 'GDP', 'Countries' and the five 'Years'. 
+
+```{r GDP, eval=FALSE, echo=TRUE}
+# bind columns
+GDP_df <- cbind(Countries, GDP, Years)
+
+# convert to data frame
+GDP_df <- as.data.frame(GDP_df)
+
+# convert GDP to numeric
+GDP_df$GDP <- as.numeric(GDP_df$GDP)
+
+
+# pivot data frame from long to wide
+GDP_wide <- GDP_df %>%
+  # column names = years
+  pivot_wider(names_from = Years,
+              # rows = GDP
+              values_from = GDP,
+              # if there is no GDP score, write 'NA'
+              values_fill = NA)
+
+# get mean GDP from all years
+GDP_wide$mean_score = rowMeans(GDP_wide[,c(2:6)], na.rm = TRUE)
+
+# round decimals to 2 digits
+GDP_wide <- GDP_wide %>%  
+  mutate_if(is.numeric,
+            round,
+            digits = 2)
+
+print(GDP_wide)
+```
+
+
+## Family data frame
+Now we create a data frame with the columns 'Family', 'Countries' and the five 'Years'.
+
+```{r family, eval=FALSE, echo=TRUE}
+# bind columns
+Family_df <- cbind(Countries, Family, Years)
+
+# convert to data frame
+Family_df <- as.data.frame(Family_df)
+
+# convert Family to numeric
+Family_df$Family <- as.numeric(Family_df$Family)
+
+
+# pivot data frame from long to wide
+family_wide <- Family_df %>%
+  # column names = years
+  pivot_wider(names_from = Years,
+              # rows = Family
+              values_from = Family,
+              # if there is no Family score, write 'NA'
+              values_fill = NA)
+
+# get mean family score of all years
+family_wide$mean_score = rowMeans(family_wide[,c(2:6)], na.rm = TRUE)
+
+# round decimals to 2 digits
+family_wide <- family_wide %>%  
+  mutate_if(is.numeric,
+            round,
+            digits = 2)
+
+print(family_wide)
+```
+
+
+## Health data frame
+Now we create a data frame with the columns 'Health', 'Countries' and the five 'Years'.
+
+```{r health, eval=FALSE, echo=TRUE}
+# cbind
+health_df <- cbind(Countries, Health, Years)
+
+# convert to data frame
+health_df <- as.data.frame(health_df)
+
+# convert Family to numeric
+health_df$Health <- as.numeric(health_df$Health)
+
+# pivot data frame from long to wide
+health_wide <- health_df %>%
+  # column names = years
+  pivot_wider(names_from = Years,
+              # rows = Family
+              values_from = Health,
+              # if there is no Family score, write 'NA'
+              values_fill = NA)
+
+# get mean health score of all years
+health_wide$mean_score = rowMeans(health_wide[,c(2:6)], na.rm = TRUE)
+
+# round decimals to 2 digits 
+health_wide <- health_wide %>%  
+  mutate_if(is.numeric,
+            round,
+            digits = 2)
+
+print(health_wide)
+```
+
+
+# Happiness map
+We create a leaflet map were we set the view to 0,0 to get a view of the whole world. 
+
+We then set the labels to the pop-up boxes where we want the HPI score, GDP score, Family score and Health score to be displayed for each country. We uses addPolygons to do this. 
+
+We also use addLegend in order to color the map by the HPI values. 
+
+
+We get the countries map data set from [this](https://datahub.io/core/geo-countries#r) page. 
+
+```{r world countries, eval=FALSE, echo=TRUE}
+countries_world <- readOGR("../input/countries.geojson")
+```
+
+
+First we need to find out if any of the countries in our selfmade data frames are not in the countries_world data frame. 
+
+```{r not in function, eval=FALSE, echo=TRUE}
+# function for finding 'not in'
+'%nin%' <- Negate('%in%')
+
+# check missing names
+HPI_wide$Countries[HPI_wide$Countries  %nin% countries_world$ADMIN]
+```
+
+
+We then need to rename the mismatching countries, so they have the same spelling. 
+
+```{r rename countries, eval=FALSE, echo=TRUE}
+# happiness
+HPI_wide <- HPI_wide %>%
+    mutate(Countries = recode(Countries, 
+                              'United States' = 'United States of America',
+                              'North Cyprus' = 'Northern Cyprus',
+                              'Congo (Kinshasa)' = 'Democratic Republic of the Congo',
+                              'Congo (Brazzaville)' = 'Republic of Congo'))
+
+# economy
+GDP_wide <- GDP_wide %>%
+    mutate(Countries = recode(Countries, 
+                              'United States' = 'United States of America',
+                              'North Cyprus' = 'Northern Cyprus',
+                              'Congo (Kinshasa)' = 'Democratic Republic of the Congo',
+                              'Congo (Brazzaville)' = 'Republic of Congo'))
+
+# social support
+family_wide <- family_wide %>%
+    mutate(Countries = recode(Countries, 
+                              'United States' = 'United States of America',
+                              'North Cyprus' = 'Northern Cyprus',
+                              'Congo (Kinshasa)' = 'Democratic Republic of the Congo',
+                              'Congo (Brazzaville)' = 'Republic of Congo'))
+
+# health
+health_wide <- health_wide %>%
+    mutate(Countries = recode(Countries, 
+                              'United States' = 'United States of America',
+                              'North Cyprus' = 'Northern Cyprus',
+                              'Congo (Kinshasa)' = 'Democratic Republic of the Congo',
+                              'Congo (Brazzaville)' = 'Republic of Congo'))
+```
+
+
+Some of the mismatching countries does not appear in the countries_world data set and we will therefore delete the rows in our selfmade data frame.
+
+```{r delete rows, eval=FALSE, echo=TRUE}
+HPI_wide <- HPI_wide[-c(146, 91, 162, 165, 166, 167, 169, 108, 87, 72),]
+GDP_wide <- GDP_wide[-c(146, 91, 162, 165, 166, 167, 169, 108, 87, 72),]
+health_wide <- health_wide[-c(146, 91, 162, 165, 166, 167, 169, 108, 87, 72),]
+family_wide <- family_wide[-c(146, 91, 162, 165, 166, 167, 169, 108, 87, 72),]
+```
+
+
+We now want to create a tibble data frame with all the 255 countries from the countries_world data set. 
+
+```{r tibble data frames, eval=FALSE, echo=TRUE}
+countries_world_HPI <- tibble(Countries = countries_world$ADMIN)
+countries_world_GDP <- tibble(Countries = countries_world$ADMIN)
+countries_world_family <- tibble(Countries = countries_world$ADMIN)
+countries_world_health <- tibble(Countries = countries_world$ADMIN)
+```
+
+
+Then we want to join the 255 countries into our four selfmade data frames in order to make sure our polygon data and data frames has the same length. 
+
+```{r join countries, eval=FALSE, echo=TRUE}
+HPI_polygon_countries <- countries_world_HPI %>% 
+  left_join(HPI_wide, by = "Countries", keep = TRUE) %>% 
+  distinct(Countries.x,.keep_all = TRUE) 
+
+GDP_polygon_countries <- countries_world_GDP %>% 
+  left_join(GDP_wide, by = "Countries", keep = TRUE) %>% 
+  distinct(Countries.x,.keep_all = TRUE)
+
+family_polygon_countries <- countries_world_family %>% 
+  left_join(family_wide, by = "Countries", keep = TRUE) %>% 
+  distinct(Countries.x,.keep_all = TRUE) 
+
+health_polygon_countries <- countries_world_health %>% 
+  left_join(health_wide, by = "Countries", keep = TRUE) %>% 
+  distinct(Countries.x,.keep_all = TRUE)
+```
+
+
+Define labels for the countries in our map.
+
+```{r set labels, eval=FALSE, echo=TRUE}
+# set label names
+labels <- sprintf(
+  "<strong> %s</strong><br/><strong style=color:rgb(245,189,31);>
+  HPI score: </strong> %s <br/><strong style=color:rgb(245,189,31);>
+  GDP score: </strong> %s <br/><strong style=color:rgb(245,189,31);>
+  Family score: </strong> %s <br/><strong style=color:rgb(245,189,31);>
+  Health score: </strong> %s",
+  HPI_polygon_countries$Countries.x,
+  HPI_polygon_countries$mean_score,
+  GDP_polygon_countries$mean_score,
+  family_polygon_countries$mean_score,
+  health_polygon_countries$mean_score
+  ) %>% lapply(htmltools::HTML)
+```
+
+
+Define palette colors for our legend in the map.
+
+```{r palette colors, eval=FALSE, echo=TRUE}
+# define palette colors 
+pal <- colorNumeric("YlOrRd", 
+                    domain = HPI_polygon_countries$mean_score, 
+                    na.color = '#388F72')
+```
+
+
+Now we create our beautiful leaflet map.
+
+```{r leaflet map, eval=FALSE, echo=TRUE}
+# create leaflet map
+map <- leaflet(countries_world) %>%
+  addTiles() %>%
+  # set view to 0,0 and zoom 1
+  setView(lng = 0, lat =  0, zoom = 1) %>% 
+  
+  # add tiles with mapbox
+  addProviderTiles("MapBox", options = providerTileOptions(
+    id = "mapbox.light",
+    accessToken = Sys.getenv('MAPBOX_ACCESS_TOKEN'))) %>% 
+  
+  # add polygons
+  addPolygons(
+    fillColor = ~pal(HPI_polygon_countries$mean_score),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+  
+    # add labels 
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) %>% 
+
+  # add legend with HPI scores
+  addLegend(pal = pal, 
+            values = ~HPI_polygon_countries$mean_score, 
+            opacity = 0.7, 
+            title = "HPI score",
+            position = "bottomright")
+
+# save map as a html document 
+saveWidget(map, "../output/HPI_map.html", selfcontained = TRUE)
+```
+
+
+# Temperature map
+In order to investigate if there is a correlation between happiness and weather, we create a temperature map, so we can make a visual comparison between the map of happiness and the temperature map. 
+
+```{r temperature map, eval=FALSE, echo=TRUE}
+# loading raster data "WorldClimate"
+climate <- getData(name = "worldclim", var = "bio", res = 10)
+
+# saving the column BIO1, which is the Annual Mean Temperature 
+mean_temp <- climate$bio1
+
+# the Worldclim temperature dataset is stated to have a gain of 0.1, which means that it must be multiplied by 0.1 to convert back to degrees Celsius
+gain(mean_temp) <- 0.1
+
+# plot map 
+plot(mean_temp, main = "Annual Mean Temperature  (in celcius)")
+```
+
+
+# Compare temperature and happiness
+
+First we need to find the top 10 happiest countries.
+
+```{r top 10 HPI, eval=FALSE, echo=TRUE}
+# sort by mean score in descending order
+top10_hpi <- head(HPI_wide[order(-HPI_wide$mean_score),c(1,7)], n=10)
+
+# sort by alphabetically 
+hpi_sort <- top10_hpi[order(top10_hpi$Countries), ]
+
+print(top10_hpi)
+```
+
+
+As we can see the top 10 most happy countries is Denmark, Norway, Finland, Switzerland, Iceland, Netherlands, Canada, Sweden, New Zealand and Australia. 
+
+
+## Top 10 happiest countries' economy, social support and health
+We now want  to take a look at the top 10 countries economy, social support and health to see if they are similar. 
+
+
+We start with creating a function for finding the top 10 countries.
+
+```{r look for, eval=FALSE, echo=TRUE}
+look.for <- c('Denmark', 'Norway', 'Finland', 'Switzerland', 'Iceland', 'Netherlands', 'Canada', 'Sweden', 'New Zealand', 'Australia')
+```
+
+
+We then find the GDP per capita for the top 10 countries and sort them alphabetically.
+
+```{r GDP top10, eval=FALSE, echo=TRUE}
+# gdp for top 10
+top10_gdp <- GDP_polygon_countries[GDP_polygon_countries$Countries.x %in% look.for, ]
+
+# sort alphabetically
+gdp_sort <- top10_gdp[order(top10_gdp$Countries.x), ]
+```
+
+
+... And the social support score.
+
+```{r family top10, eval=FALSE, echo=TRUE}
+# family for top 10
+top10_family <- family_polygon_countries[family_polygon_countries$Countries.x %in% look.for, ]
+
+# sort alphabetically
+family_sort <- top10_family[order(top10_family$Countries.x), ]
+```
+
+
+... And the health score.
+
+```{r health top10, eval=FALSE, echo=TRUE}
+# health for top 10
+top10_health <- health_polygon_countries[health_polygon_countries$Countries.x %in% look.for, ]
+
+# sort alphabetically
+health_sort <- top10_health[order(top10_health$Countries.x), ]
+```
+
+
+We then create a data frame with four values for each of the top 10 countries. 
+```{r top10 new data frame, eval=FALSE, echo=TRUE}
+# bind columns 
+top10_df <- cbind(hpi_sort$Countries, hpi_sort$mean_score, gdp_sort$mean_score, family_sort$mean_score, health_sort$mean_score)
+
+# convert to data frame
+top10_df <- as.data.frame(top10_df)
+
+# rename columns
+top10_df <- top10_df %>% 
+  rename(
+    Countries = V1,
+    'HPI score' = V2,
+    'GDP score' = V3, 
+    'Family score' = V4,
+    'Health score' = V5
+    )
+
+print(top10_df)
+```
+
+
+
+## Temperature for the top 10 happiest countries
+Find temperature for the 10 happiest countries to see if the climate is about the same for the 10 countries.
+
+We have used the longitude and latitude for the capitals in the top 10 countries. We have found the coordinates on [this](https://www.findlatitudeandlongitude.com/) page. 
+
+```{r temperature for top 10 HPI, eval=FALSE, echo=TRUE}
+# get first column in climate dataset with annual temperature 
+climate_temp <- climate[[c(1)]]
+names(climate_temp) <- c("Temp")
+
+# convert to celsisius
+gain(climate_temp) <- 0.1
+
+# get latitude for top 10
+lat <- c(55.676098, 
+         59.913868,
+         60.186826,
+         46.947974,
+         64.146582,
+         52.367984,
+         45.42153,
+         59.329323,
+         -41.28646,
+         -35.280937)
+
+# get longitude for top 10
+long <- c(12.568337,
+          10.752245,
+          24.935301,
+          7.447447,
+          -21.942635,
+          4.903561,
+          -75.697193,
+          18.06858,
+          174.776236,
+          149.130009) 
+
+# coordinates
+coords <- data.frame(x=long,y=lat)
+# spatial points
+points <- SpatialPoints(coords, proj4string = climate_temp@crs)
+
+# extract values
+values <- extract(climate_temp,points)
+
+# combine columns to new data frame 
+top10_temp <- cbind.data.frame(coordinates(points),values)
+
+# rename columns
+top10_temp <- top10_temp %>% 
+  rename(
+    Longitude = x,
+    Latitude = y, 
+    'Annual mean temperature' = values
+    )
+
+# create new column with country names
+top10_temp$Country <- c('Denmark', 'Norway', 'Finland', 'Switzerland', 'Iceland', 'Netherlands', 'Canada', 'Sweden', 'New Zealand', 'Australia')
+
+# change column order
+top10_temp <- top10_temp %>% relocate(Country, .before = Longitude)
+
+print(top10_temp)
+```
+
+
+Plot the top 10 countries on temperature map 
+
+```{r plot, eval=FALSE, echo=TRUE}
+plot(climate_temp[[1]])
+plot(points,add=T)
+```
+
