@@ -16,7 +16,7 @@ Third, we used ```raster``` to get the world climate in order to create a simply
 
 ## Usage
 In order to reproduce this code, you'll need to uploade your own data into the ```input``` folder.   
-We have used five dataset, that can be found [here](https://www.kaggle.com/datasets/unsdsn/world-happiness).    
+We have used datasets from 2015-2019, which can be found on [kaggle](https://www.kaggle.com/datasets/unsdsn/world-happiness).    
 For our polygon data with the countries, we have used the 'countries' dataset from [datahub](https://datahub.io/core/geo-countries#resource-countries). 
 
 You'll also have to install the needed packages, which can be found in ```requirements.txt```. 
