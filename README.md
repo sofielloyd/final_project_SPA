@@ -29,7 +29,7 @@ This repository has the following directory structure:
 
 - The ```input``` folders contains five .csv files with data from 2015-2019 and a .geojson file with the polygon data for the countries. The .csv files can also be downloaded from [kaggle](https://www.kaggle.com/datasets/unsdsn/world-happiness) and the .geojson file can be downloaded from [datahub](https://datahub.io/core/geo-countries#resource-countries). 
 
-- The ```output``` folders contains my results and it is this folder that you should save your own results when replicating the code. 
+- The ```output``` folders contains our results (see more under 'Results')
 
 - The ```src``` folders contains the code written in ```.Rmd``` scripts. 
 
