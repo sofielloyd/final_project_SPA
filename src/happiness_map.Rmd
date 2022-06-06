@@ -626,6 +626,9 @@ coords <- data.frame(x=long,y=lat)
 # spatial points
 points <- SpatialPoints(coords, proj4string = climate_temp@crs)
 
+# uncomment this if the extract function does not work
+# .rs.unloadPackage("tidyr")
+
 # extract values
 values <- extract(climate_temp,points)
 
