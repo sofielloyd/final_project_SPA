@@ -4,8 +4,8 @@ This repository contains all of the code and data related to the final project f
 
 ## Assignment description 
 Our hypothesis is that the ten most happy countries in the world has a similar climate.   
-In order to investigate this hypothesis we have created a leaflet map with the HPI (Happy Planet Index) score the legend value. We have further created a temperature map, with the annual mean temperature across the globe.   
-To compare the two maps, we have found the ten most happy countries and plotted them into the temperature in order to visualise they geographically is located.  
+In order to investigate this hypothesis we have created a leaflet map with the HPI (Happy Planet Index) score as the legend value. We have further created a temperature map with the annual mean temperature across the globe.   
+To compare the two maps, we have found the ten most happy countries and plotted them into the temperature map in order to visualise how they geographically is located.  
 
 
 ## Method
@@ -16,7 +16,8 @@ Third, we used ```raster``` to get the world climate in order to create a simply
 
 ## Usage
 In order to reproduce this code, you'll need to uploade your own data into the ```input``` folder.   
-We have used five dataset, that can be found [here](https://www.kaggle.com/datasets/unsdsn/world-happiness).  
+We have used five dataset, that can be found [here](https://www.kaggle.com/datasets/unsdsn/world-happiness).    
+For our polygon data with the countries, we have used the 'countries' dataset from [datahub](https://datahub.io/core/geo-countries#resource-countries). 
 
 You'll also have to install the needed packages, which can be found in ```requirements.txt```. 
 
