@@ -15,12 +15,7 @@ Third, we used ```raster``` to get the world climate in order to create a simply
 
 
 ## Usage
-In order to reproduce this code, you'll need to uploade your own data into the ```input``` folder.   
-We have used datasets from 2015-2019, which can be found on [kaggle](https://www.kaggle.com/datasets/unsdsn/world-happiness).    
-For our polygon data with the countries, we have used the 'countries' dataset from [datahub](https://datahub.io/core/geo-countries#resource-countries). 
-
-You'll also have to install the needed packages, which can be found in ```requirements.txt```. 
-
+You'll have to install the needed packages, which can be found in ```requirements.txt```. 
 
 ### Repo Structure  
 This repository has the following directory structure:  
@@ -32,7 +27,7 @@ This repository has the following directory structure:
 | ```src``` | R scripts |
 
 
-- The ```input``` folders are empty and this is where you should upload your own data, if you want to reproduce the code.
+- The ```input``` folders contains five .csv files with data from 2015-2019 and a .geojson file with the polygon data for the countries. The .csv files can also be downloaded from [kaggle](https://www.kaggle.com/datasets/unsdsn/world-happiness) and the .geojson file can be downloaded from [datahub](https://datahub.io/core/geo-countries#resource-countries). 
 
 - The ```output``` folders contains my results and it is this folder that you should save your own results when replicating the code. 
 
