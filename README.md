@@ -15,7 +15,7 @@ Third, we used ```raster``` to get the world climate in order to create a simply
 
 
 ## Usage
-You'll have to install the needed packages, which can be found in ```requirements.txt```. 
+The code can be run in R or Rstudio.
 
 ### Repo Structure  
 This repository has the following directory structure:  
