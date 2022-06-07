@@ -1,5 +1,5 @@
 # Map of Happiness - final project
-This repository contains all of the code and data related to the final project for Laura Louise Rokkjær and Sofie K. Lloyd Thomsens exam in the Spring 2022 module **Spatial Analytics** which is a part of our tilvalg in Cultural Data Science at Aarhus University.  
+This repository contains all of the code and data related to the final project for Laura Louise Rokkjær (201908876) & Sofie Kathleen Lloyd Thomsen (201908339)'s exam in the Spring 2022 module **Spatial Analytics** which is a part of our tilvalg in Cultural Data Science at Aarhus University.  
 
 
 ## Assignment description 
